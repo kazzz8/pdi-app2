@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>現場作業管理システム（仮称）導入提案</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Meiryo", "Yu Gothic", "MS Gothic", sans-serif;
+      font-size: 11pt;
+      color: #1a1a1a;
+      background: #f0f0f0;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 20px auto;
+      padding: 20mm 18mm 18mm 18mm;
+    }
+
+    /* ヘッダー */
+    .doc-header {
+      border-bottom: 3px solid #1a3a6b;
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+    .doc-header .date-to {
+      font-size: 9.5pt;
+      color: #444;
+      text-align: right;
+      margin-bottom: 6px;
+    }
+    .doc-header h1 {
+      font-size: 17pt;
+      color: #1a3a6b;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    .doc-header .subtitle {
+      font-size: 10pt;
+      color: #555;
+      margin-top: 4px;
+    }
+
+    /* セクション */
+    .section {
+      margin-bottom: 18px;
+    }
+    .section-title {
+      font-size: 11.5pt;
+      font-weight: bold;
+      color: white;
+      background: #1a3a6b;
+      padding: 4px 10px;
+      margin-bottom: 10px;
+    }
+    .section-title span {
+      font-size: 9pt;
+      font-weight: normal;
+      margin-left: 8px;
+      opacity: 0.85;
+    }
+
+    /* 課題ブロック */
+    .issue-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .issue-card {
+      border: 1px solid #ccc;
+      border-top: 3px solid #c0392b;
+      padding: 8px 10px;
+      background: #fafafa;
+    }
+    .issue-card h4 {
+      font-size: 9.5pt;
+      color: #c0392b;
+      margin-bottom: 5px;
+    }
+    .issue-card p {
+      font-size: 9pt;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* 矢印 */
+    .arrow-row {
+      text-align: center;
+      font-size: 18pt;
+      color: #1a3a6b;
+      margin: 6px 0;
+      line-height: 1;
+    }
+
+    /* 解決策ボックス */
+    .solution-box {
+      background: #eaf0fb;
+      border: 2px solid #1a3a6b;
+      border-radius: 4px;
+      padding: 12px 16px;
+    }
+    .solution-box h3 {
+      font-size: 12pt;
+      color: #1a3a6b;
+      margin-bottom: 8px;
+    }
+    .solution-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 9.5pt;
+    }
+    .feature-item .icon {
+      color: #1a3a6b;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* 効果テーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+    }
+    th {
+      background: #1a3a6b;
+      color: white;
+      padding: 5px 10px;
+      text-align: left;
+      font-weight: normal;
+    }
+    td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #ddd;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td {
+      background: #f5f7fc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 8.5pt;
+      font-weight: bold;
+    }
+    .badge-high { background: #fdecea; color: #c0392b; }
+    .badge-mid  { background: #fef9e7; color: #b7770d; }
+
+    /* 移行フロー */
+    .phase-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .phase-card {
+      border: 1px solid #bbb;
+      border-top: 3px solid #1a3a6b;
+      padding: 7px 8px;
+      text-align: center;
+    }
+    .phase-card .phase-label {
+      font-size: 8pt;
+      color: #1a3a6b;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    .phase-card .phase-period {
+      font-size: 8pt;
+      color: #777;
+      margin-bottom: 4px;
+    }
+    .phase-card p {
+      font-size: 8.5pt;
+      line-height: 1.5;
+    }
+
+    /* 既存システム比較 */
+    .system-compare {
+      display: grid;
+      grid-template-columns: 1fr 30px 1fr;
+      gap: 0;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .sys-box {
+      border: 1px solid #ccc;
+      padding: 8px 10px;
+      font-size: 9pt;
+      line-height: 1.6;
+    }
+    .sys-box h4 {
+      font-size: 9.5pt;
+      font-weight: bold;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 3px;
+    }
+    .sys-box.current h4 { color: #888; }
+    .sys-box.future h4  { color: #1a3a6b; }
+    .sys-arrow {
+      text-align: center;
+      font-size: 14pt;
+      color: #1a3a6b;
+    }
+    .keep  { color: #27ae60; font-weight: bold; }
+    .replace { color: #c0392b; font-weight: bold; }
+
+    /* アクション */
+    .action-box {
+      background: #fffbe6;
+      border: 1px solid #f0c040;
+      border-left: 4px solid #f0c040;
+      padding: 10px 14px;
+      font-size: 9.5pt;
+      line-height: 1.8;
+    }
+    .action-box h4 {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #7d5a00;
+      margin-bottom: 6px;
+    }
+
+    /* フッター */
+    .doc-footer {
+      border-top: 1px solid #ccc;
+      margin-top: 20px;
+      padding-top: 8px;
+      font-size: 8.5pt;
+      color: #888;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* 強調数字 */
+    .big-number {
+      font-size: 15pt;
+      font-weight: bold;
+      color: #1a3a6b;
+    }
+
+    .note {
+      font-size: 8pt;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    @media print {
+      body { background: white; }
+      .page { margin: 0; padding: 15mm 15mm 15mm 15mm; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="doc-header">
+    <div class="date-to">
+      2026年4月　情報システム部
+    </div>
+    <h1>現場作業管理システム（仮称）導入提案</h1>
+    <div class="subtitle">現場の二重入力・紙作業を解消し、作業記録を一元管理する内製システムの導入について</div>
+  </div>
+
+  <!-- 1. 現状の課題 -->
+  <div class="section">
+    <div class="section-title">1．現状の課題</div>
+    <div class="issue-grid">
+      <div class="issue-card">
+        <h4>課題① 三重の入力負担</h4>
+        <p>作業完了・不具合の記録を<br>「紙」「自社システム」「マツダシステム」の<br>3箇所に個別入力している。<br>同じ情報を何度も入力する無駄が生じている。</p>
+      </div>
+      <div class="issue-card">
+        <h4>課題② 共有PCへの移動</h4>
+        <p>作業時間の報告には共有PCを使用するため、<br>作業場所から離れてPC前に並ぶ時間が<br>毎日発生している。</p>
+      </div>
+      <div class="issue-card">
+        <h4>課題③ 自社システムの機能未達</h4>
+        <p>自社ベンダーシステムはマツダシステムとの<br>自動連携を目的に導入されたが、<br>連携は現在も未実現のまま。<br>投資効果が十分に出ていない。</p>
+      </div>
+    </div>
+    <p class="note">※上記課題は作業者 200〜300名 全員に影響している</p>
+  </div>
+
+  <!-- 2. 提案内容 -->
+  <div class="section">
+    <div class="section-title">2．提案内容</div>
+    <div class="solution-box">
+      <h3>現場作業管理システム（仮称）の導入</h3>
+      <div class="solution-features">
+        <div class="feature-item">
+          <span class="icon">▶</span>
+          <span>スマートフォン・タブレットから作業記録をその場で入力。共有PCへの移動が不要になる。</span>
+        </div>
+        <div class="feature-item">
+          <span class="icon">▶</span>
+          <span>作業時間・完了報告・不具合情報を1つのシステムに一元化。入力は1回で完結。</span>
+        </div>
+        <div class="feature-item">
+          <span class="icon">▶</span>
+          <span>不具合箇所の写真をその場で撮影・記録。紙への記載が不要になる。</span>
+        </div>
+        <div class="feature-item">
+          <span class="icon">▶</span>
+          <span>情報システム部が社内で内製開発。追加のベンダーコストが発生しない。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 導入効果 -->
+  <div class="section">
+    <div class="section-title">3．期待される効果</div>
+    <table>
+      <tr>
+        <th style="width:18%">区分</th>
+        <th style="width:42%">効果</th>
+        <th style="width:40%">補足</th>
+      </tr>
+      <tr>
+        <td><span class="badge badge-high">工数削減</span></td>
+        <td>1人あたり1日<span class="big-number"> 約5〜10分 </span>の入力時間を削減</td>
+        <td>200名換算で年間 <strong>約1,700〜3,300時間</strong> の削減試算（※）</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-high">品質向上</span></td>
+        <td>紙とシステムの転記ミス・記入漏れを防止</td>
+        <td>情報の一元化により不具合記録の抜け漏れが減少</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-high">コスト削減</span></td>
+        <td>自社ベンダーシステムの保守費用を削減</td>
+        <td>段階的移行後に廃止することで維持コストをゼロに</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-mid">即時性</span></td>
+        <td>管理者がリアルタイムで作業進捗を把握可能</td>
+        <td>集計・確認のための問い合わせ工数も削減</td>
+      </tr>
+    </table>
+    <p class="note">※ 試算は1人5〜10分/日 × 200名 × 250日で算出。実際の削減効果は試験運用にて計測予定。</p>
+  </div>
+
+  <!-- 4. 既存システムとの関係 -->
+  <div class="section">
+    <div class="section-title">4．既存システムとの関係</div>
+    <div class="system-compare">
+      <div class="sys-box current">
+        <h4>現状（3システム並存）</h4>
+        マツダシステム<br>
+        　└ 完成車輸送管理・作業完了報告<br>
+        自社ベンダーシステム<br>
+        　└ 作業時間管理・作業完了報告<br>
+        　└ マツダ連携：<span class="replace">未実現</span><br>
+        紙（点検票・不具合票）
+      </div>
+      <div class="sys-arrow">→</div>
+      <div class="sys-box future">
+        <h4>移行後（役割を整理）</h4>
+        マツダシステム<br>
+        　└ <span class="keep">継続利用</span>（変更なし）<br>
+        現場作業管理システム（仮称）<br>
+        　└ 作業時間・完了・不具合を一元管理<br>
+        　└ 自社ベンダーシステムを<span class="replace">置き換え</span><br>
+        紙：<span class="replace">廃止</span>
+      </div>
+    </div>
+    <p class="note">※ マツダシステムへの報告は従来通り作業者が行う。将来的な自動連携は中長期の検討事項とする。</p>
+  </div>
+
+  <!-- 5. 導入スケジュール -->
+  <div class="section">
+    <div class="section-title">5．導入スケジュール（案）</div>
+    <div class="phase-row">
+      <div class="phase-card">
+        <div class="phase-label">Phase 1</div>
+        <div class="phase-period">〜2026年夏頃</div>
+        <p>開発完了<br>社内テスト<br>インフラ準備</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-label">Phase 2</div>
+        <div class="phase-period">2026年秋頃</div>
+        <p>1〜2チームで<br>試験運用開始<br>現場フィードバック収集</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-label">Phase 3</div>
+        <div class="phase-period">2026年度内</div>
+        <p>全体展開<br>紙運用廃止<br>効果測定</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-label">Phase 4</div>
+        <div class="phase-period">移行完了後</div>
+        <p>自社ベンダー<br>システム廃止<br>保守費用削減</p>
+      </div>
+    </div>
+    <p class="note">※ スケジュールは目安。セキュリティ審査・稟議の進行状況により変動あり。</p>
+  </div>
+
+  <!-- 6. ご確認いただきたいこと -->
+  <div class="section">
+    <div class="section-title">6．ご確認・ご支援のお願い</div>
+    <div class="action-box">
+      <h4>本提案の推進にあたり、以下についてご意見・ご支援をいただけますと幸いです。</h4>
+      ① 本提案の方向性についてご賛同いただけるかどうか<br>
+      ② 試験運用にご協力いただける現場チームのご紹介<br>
+      ③ 正式導入に向けた社内調整における後ろ盾のご支援
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <div class="doc-footer">
+    <span>内部資料　取扱注意</span>
+    <span>情報システム部　作成</span>
+    <span>2026年4月</span>
+  </div>
+
+</div>
+
+</body>
+</html>

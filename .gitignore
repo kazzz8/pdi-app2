@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+certificates
+.vercel
+
+# Claude Code settings
+.claude/
+
+# 参考資料（社内データ）
+参考資料/

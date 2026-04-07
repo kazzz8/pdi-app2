@@ -1,0 +1,343 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ===========================
+// マスタ系
+// ===========================
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  createdAt   DateTime @default(now())
+
+  users       User[]
+  workPlans   WorkPlan[]
+}
+
+model User {
+  id          String   @id @default(cuid())
+  employeeId  String   @unique
+  name        String
+  password    String
+  role        Role     @default(GENERAL)
+  team        Team?    @relation(fields: [teamId], references: [id])
+  teamId      String?
+  createdAt   DateTime @default(now())
+
+  workPlans           WorkPlan[]
+  workLogs            WorkLog[]
+  inspectionReports   InspectionReport[]
+  repairLogs          RepairLog[]
+  vehicleDressUpOrders VehicleDressUpOrder[]
+  checkResults        CheckResult[]
+  photos              Photo[]
+  workPhotos          WorkPhoto[]
+  importBatches       ImportBatch[]
+}
+
+enum Role {
+  GENERAL      // 一般作業者
+  TEAM_LEADER  // 班長
+  MANAGER      // 管理者
+}
+
+model DressUpItem {
+  id              String   @id @default(cuid())
+  name            String
+  code            String   @unique
+  checkTemplate   Json?    // チェック項目テンプレート
+  createdAt       DateTime @default(now())
+
+  vehicleDressUpOrders VehicleDressUpOrder[]
+}
+
+model StorageLocation {
+  id           String   @id @default(cuid())
+  zone         String
+  positionCode String
+  isOccupied   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  vehicle      Vehicle?
+
+  @@unique([zone, positionCode])
+}
+
+// ===========================
+// 車両・計画系
+// ===========================
+
+model Vehicle {
+  id                String   @id @default(cuid())
+  // 整理番号（年+月+追番）
+  serialYear        String
+  serialMonth       String
+  serialSequence    String
+  barcode           String   @unique  // 整理番号を結合した文字列
+  vin               String?
+  modelName         String?
+  modelCode         String?
+  exteriorColor     String?
+  inspectionType    InspectionType @default(L)
+  hasPolish         Boolean  @default(true)
+  hasDressUp        Boolean  @default(false)
+  hasDeliveryInspection Boolean @default(true)
+  mazdaDefects      Json?    // マツダ側の不具合内容1〜5
+  status            VehicleStatus @default(ARRIVED)
+  storageLocation   StorageLocation? @relation(fields: [storageLocationId], references: [id])
+  storageLocationId String?  @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  workPlans           WorkPlan[]
+  workLogs            WorkLog[]
+  inspectionReports   InspectionReport[]
+  defects             Defect[]
+  repairLogs          RepairLog[]
+  vehicleDressUpOrders VehicleDressUpOrder[]
+  checkResults        CheckResult[]
+}
+
+enum InspectionType {
+  L
+  S
+}
+
+enum VehicleStatus {
+  ARRIVED         // 入庫
+  IN_STORAGE      // 保管中
+  IN_PROCESS      // 作業中
+  COMPLETED       // 完成検査完了
+  DISPATCHED      // 出庫済
+}
+
+model ImportBatch {
+  id          String   @id @default(cuid())
+  fileName    String
+  importedAt  DateTime @default(now())
+  importedBy  User     @relation(fields: [importedById], references: [id])
+  importedById String
+  recordCount Int
+  processType ProcessType?
+
+  workPlans   WorkPlan[]
+}
+
+model WorkPlan {
+  id              String      @id @default(cuid())
+  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id])
+  vehicleId       String
+  processType     ProcessType
+  team            Team?       @relation(fields: [teamId], references: [id])
+  teamId          String?
+  assignedWorker  User?       @relation(fields: [assignedWorkerId], references: [id])
+  assignedWorkerId String?
+  plannedStart    DateTime
+  plannedEnd      DateTime
+  standardMinutes Int?
+  deliveryDeadline DateTime?
+  importBatch     ImportBatch? @relation(fields: [importBatchId], references: [id])
+  importBatchId   String?
+  createdAt       DateTime    @default(now())
+
+  workLogs        WorkLog[]
+  photos          WorkPhoto[]
+}
+
+enum ProcessType {
+  LOADING           // 積み込み・降ろし
+  STORAGE           // 保管
+  RETRIEVAL         // 回送
+  WASH              // 洗車
+  POLISH            // 磨き
+  L_INSPECTION      // L点検
+  S_INSPECTION      // S点検
+  REPAIR            // 補修
+  RUST_PREVENTION   // 防錆
+  PARTS_ISSUE       // ドレスアップ部品払い出し
+  DRESS_UP          // ドレスアップ
+  COATING           // コーティング
+  FINAL_INSPECTION  // 完成検査
+  OTHER             // その他（計画外作業）
+}
+
+// ===========================
+// 作業実績系
+// ===========================
+
+model WorkLog {
+  id          String         @id @default(cuid())
+  workPlan    WorkPlan?      @relation(fields: [workPlanId], references: [id])
+  workPlanId  String?
+  vehicle     Vehicle        @relation(fields: [vehicleId], references: [id])
+  vehicleId   String
+  worker      User           @relation(fields: [workerId], references: [id])
+  workerId    String
+  processType ProcessType
+  startedAt   DateTime
+  endedAt     DateTime?
+  status      WorkLogStatus  @default(ACTIVE)
+  notes       String?        // 中断理由など
+  isPlanned   Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+}
+
+model WorkPhoto {
+  id             String    @id @default(cuid())
+  workPlan       WorkPlan  @relation(fields: [workPlanId], references: [id])
+  workPlanId     String
+  worker         User      @relation(fields: [workerId], references: [id])
+  workerId       String
+  checklistItem  String?   // 紐付くチェックリスト項目名（null は汎用写真）
+  url            String
+  caption        String?
+  takenAt        DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+}
+
+enum WorkLogStatus {
+  ACTIVE     // 作業中
+  PAUSED     // 一時中断
+  COMPLETED  // 完了
+}
+
+// ===========================
+// 点検・補修系
+// ===========================
+
+model InspectionReport {
+  id             String         @id @default(cuid())
+  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id])
+  vehicleId      String
+  worker         User           @relation(fields: [workerId], references: [id])
+  workerId       String
+  inspectionType InspectionType
+  startedAt      DateTime
+  endedAt        DateTime?
+  createdAt      DateTime       @default(now())
+
+  defects        Defect[]
+}
+
+model Defect {
+  id                 String            @id @default(cuid())
+  inspectionReport   InspectionReport  @relation(fields: [inspectionReportId], references: [id])
+  inspectionReportId String
+  vehicle            Vehicle           @relation(fields: [vehicleId], references: [id])
+  vehicleId          String
+  location           String            // 部位ラベル（互換用）
+  locationX          Float?            // 展開図上のX座標（%）
+  locationY          Float?            // 展開図上のY座標（%）
+  defectType         String            // 種類（例：線傷、塗装）
+  severity           DefectSeverity
+  repairMinutes      Int?              // 補修見込み時間（分）
+  description        String?
+  photoUrl           String?           // 不具合写真のURL
+  status             DefectStatus      @default(OPEN)
+  createdAt          DateTime          @default(now())
+
+  repairLogDefects   RepairLogDefect[]
+}
+
+enum DefectSeverity {
+  A
+  B
+  C
+}
+
+enum DefectStatus {
+  OPEN        // 未補修
+  IN_PROGRESS // 補修中
+  REPAIRED    // 補修済
+}
+
+model RepairLog {
+  id          String   @id @default(cuid())
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id])
+  vehicleId   String
+  worker      User     @relation(fields: [workerId], references: [id])
+  workerId    String
+  startedAt   DateTime
+  endedAt     DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  repairLogDefects RepairLogDefect[]
+}
+
+model RepairLogDefect {
+  repairLog   RepairLog @relation(fields: [repairLogId], references: [id])
+  repairLogId String
+  defect      Defect    @relation(fields: [defectId], references: [id])
+  defectId    String
+
+  @@id([repairLogId, defectId])
+}
+
+// ===========================
+// ドレスアップ・チェック系
+// ===========================
+
+model VehicleDressUpOrder {
+  id            String      @id @default(cuid())
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id])
+  vehicleId     String
+  dressUpItem   DressUpItem @relation(fields: [dressUpItemId], references: [id])
+  dressUpItemId String
+  worker        User?       @relation(fields: [workerId], references: [id])
+  workerId      String?
+  status        OrderStatus @default(PENDING)
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+enum OrderStatus {
+  PENDING     // 未着手
+  IN_PROGRESS // 作業中
+  COMPLETED   // 完了
+}
+
+model CheckResult {
+  id            String      @id @default(cuid())
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id])
+  vehicleId     String
+  processType   ProcessType
+  referenceId   String?     // 関連するwork_log_idなど
+  worker        User        @relation(fields: [workerId], references: [id])
+  workerId      String
+  items         Json        // チェック項目と結果
+  checkedAt     DateTime    @default(now())
+
+  photos        Photo[]
+}
+
+model Photo {
+  id            String       @id @default(cuid())
+  checkResult   CheckResult? @relation(fields: [checkResultId], references: [id])
+  checkResultId String?
+  worker        User         @relation(fields: [workerId], references: [id])
+  workerId      String
+  filePath      String
+  takenAt       DateTime     @default(now())
+}
+
+// ===========================
+// 日次スケジュール
+// ===========================
+
+model DailySchedule {
+  id            String   @id @default(cuid())
+  date          DateTime @unique  // 日付のみ（00:00:00 JST）
+  endHour       Int               // 終業時：17〜22
+  endMinute     Int               // 終業分：0, 15, 30, 45
+  totalVehicles Int      @default(300)  // 当日処理予定台数（計画台数の分母）
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
