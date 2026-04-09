@@ -30,78 +30,69 @@ export async function GET() {
   const endHour   = schedule?.endHour   ?? 17;
   const endMinute = schedule?.endMinute ?? 0;
 
-  const queries: [
-    ReturnType<typeof prisma.workPlan.findMany>,
-    ReturnType<typeof prisma.workLog.findMany>,
-    ReturnType<typeof prisma.workLog.findMany>,
-    ReturnType<typeof prisma.workPlan.findMany> | Promise<never[]>,
-  ] = [
-    // 今日の作業計画（自分に割り当て済み、WorkLog全件含む）
-    prisma.workPlan.findMany({
-      where: {
-        assignedWorkerId: session.user.id,
-        plannedStart: { gte: startOfDay, lt: endOfDay },
+  const plansQuery = prisma.workPlan.findMany({
+    where: {
+      assignedWorkerId: session.user.id,
+      plannedStart: { gte: startOfDay, lt: endOfDay },
+    },
+    include: {
+      vehicle: { select: { barcode: true, modelName: true, exteriorColor: true } },
+      workLogs: {
+        where: { workerId: session.user.id },
+        orderBy: { startedAt: "asc" },
       },
-      include: {
-        vehicle: { select: { barcode: true, modelName: true, exteriorColor: true } },
-        workLogs: {
-          where: { workerId: session.user.id },
-          orderBy: { startedAt: "asc" },
+    },
+    orderBy: { plannedStart: "asc" },
+  });
+
+  const interruptionLogsQuery = prisma.workLog.findMany({
+    where: {
+      workerId:    session.user.id,
+      processType: "OTHER",
+      startedAt:   { gte: startOfDay, lt: endOfDay },
+    },
+    orderBy: { startedAt: "asc" },
+  });
+
+  const pausedLogsQuery = prisma.workLog.findMany({
+    where: {
+      workerId:    session.user.id,
+      status:      "ACTIVE",
+      processType: "OTHER",
+      startedAt:   { gte: startOfDay },
+    },
+    orderBy: { startedAt: "desc" },
+    take: 1,
+  });
+
+  const partialDressUpQuery = session.user.teamId
+    ? prisma.workPlan.findMany({
+        where: {
+          assignedWorkerId: null,
+          processType: "DRESS_UP",
+          plannedStart: { gte: startOfDay, lt: endOfDay },
+          teamId: session.user.teamId,
         },
-      },
-      orderBy: { plannedStart: "asc" },
-    }),
-
-    // 今日の中断・計画外ログ（processType=OTHER）
-    prisma.workLog.findMany({
-      where: {
-        workerId:    session.user.id,
-        processType: "OTHER",
-        startedAt:   { gte: startOfDay, lt: endOfDay },
-      },
-      orderBy: { startedAt: "asc" },
-    }),
-
-    // 現在 ACTIVE な中断ログ（ダッシュボードの中断バナー用）
-    prisma.workLog.findMany({
-      where: {
-        workerId:    session.user.id,
-        status:      "ACTIVE",
-        processType: "OTHER",
-        startedAt:   { gte: startOfDay },
-      },
-      orderBy: { startedAt: "desc" },
-      take: 1,
-    }),
-
-    // 未割当の DRESS_UP 部分完了プラン（同チームの引き継ぎ用）
-    session.user.teamId
-      ? prisma.workPlan.findMany({
-          where: {
-            assignedWorkerId: null,
-            processType: "DRESS_UP",
-            plannedStart: { gte: startOfDay, lt: endOfDay },
-            teamId: session.user.teamId,
+        include: {
+          vehicle: { select: { barcode: true, modelName: true, exteriorColor: true } },
+          workLogs: {
+            where: { processType: "DRESS_UP", status: "COMPLETED" },
+            select: { id: true, status: true, processType: true, notes: true, startedAt: true, endedAt: true },
           },
-          include: {
-            vehicle: { select: { barcode: true, modelName: true, exteriorColor: true } },
-            workLogs: {
-              where: { processType: "DRESS_UP", status: "COMPLETED" },
-              select: { id: true, status: true, processType: true, notes: true, startedAt: true, endedAt: true },
-            },
-          },
-          orderBy: { plannedStart: "asc" },
-        })
-      : Promise.resolve([]),
-  ];
+        },
+        orderBy: { plannedStart: "asc" },
+      })
+    : Promise.resolve([] as never[]);
 
-  const [plans, interruptionLogs, pausedLogs, partialDressUpPlans] = await Promise.all(queries);
+  const [plans, interruptionLogs, pausedLogs, partialDressUpPlans] = await Promise.all([
+    plansQuery, interruptionLogsQuery, pausedLogsQuery, partialDressUpQuery,
+  ]);
 
   const activeInterruptionLog = pausedLogs[0] ?? null;
 
   type DelayStatus = "on_time" | "delay" | "completed" | "paused" | "active" | "partial";
 
-  const result = (plans as Awaited<typeof queries[0]>).map((plan) => {
+  const result = plans.map((plan) => {
     const logs       = plan.workLogs;
     const firstLog   = logs[0];
     const lastCompleted = [...logs].reverse().find((l) => l.status === "COMPLETED");
@@ -151,30 +142,28 @@ export async function GET() {
   });
 
   // 引き継ぎ可能な DRESS_UP 部分完了プランを追加
-  const partialResults = (partialDressUpPlans as Awaited<typeof queries[3]>)
-    .map((plan) => {
-      const logsForAgg = plan.workLogs as { status: string; processType: string; notes: string | null }[];
-      const completedItems = aggregateDressUpItems(logsForAgg);
-      if (isAllDressUpDone(completedItems)) return null; // 全完了済みは除外
+  const partialResults = partialDressUpPlans.map((plan) => {
+    const logsForAgg = plan.workLogs as { status: string; processType: string; notes: string | null }[];
+    const completedItems = aggregateDressUpItems(logsForAgg);
+    if (isAllDressUpDone(completedItems)) return null;
 
-      return {
-        id:           plan.id,
-        processType:  plan.processType,
-        processLabel: PROCESS_LABELS[plan.processType] ?? plan.processType,
-        plannedStart: plan.plannedStart.toISOString(),
-        plannedEnd:   plan.plannedEnd.toISOString(),
-        vehicle:      plan.vehicle,
-        delayStatus:  "partial" as DelayStatus,
-        pausedLogId:  null,
-        actualStart:  null,
-        actualEnd:    null,
-        isOnTime:     false,
-        startDelay:   null,
-        workLogs:     [],
-        completedItems,
-      };
-    })
-    .filter(Boolean);
+    return {
+      id:           plan.id,
+      processType:  plan.processType,
+      processLabel: PROCESS_LABELS[plan.processType] ?? plan.processType,
+      plannedStart: plan.plannedStart.toISOString(),
+      plannedEnd:   plan.plannedEnd.toISOString(),
+      vehicle:      plan.vehicle,
+      delayStatus:  "partial" as DelayStatus,
+      pausedLogId:  null,
+      actualStart:  null,
+      actualEnd:    null,
+      isOnTime:     false,
+      startDelay:   null,
+      workLogs:     [],
+      completedItems,
+    };
+  }).filter(Boolean);
 
   return NextResponse.json({
     plans: [...result, ...partialResults],
