@@ -30,15 +30,16 @@ model User {
   teamId      String?
   createdAt   DateTime @default(now())
 
-  workPlans           WorkPlan[]
-  workLogs            WorkLog[]
-  inspectionReports   InspectionReport[]
-  repairLogs          RepairLog[]
-  vehicleDressUpOrders VehicleDressUpOrder[]
-  checkResults        CheckResult[]
-  photos              Photo[]
-  workPhotos          WorkPhoto[]
-  importBatches       ImportBatch[]
+  workPlans              WorkPlan[]
+  workLogs               WorkLog[]
+  inspectionReports      InspectionReport[]
+  repairLogs             RepairLog[]
+  vehicleDressUpOrders   VehicleDressUpOrder[]
+  checkResults           CheckResult[]
+  photos                 Photo[]
+  workPhotos             WorkPhoto[]
+  importBatches          ImportBatch[]
+  qualityCheckSessions   DressUpQualityCheckSession[]
 }
 
 enum Role {
@@ -55,6 +56,7 @@ model DressUpItem {
   createdAt       DateTime @default(now())
 
   vehicleDressUpOrders VehicleDressUpOrder[]
+  qualityCheckLinks    DressUpQualityCheckLink[]
 }
 
 model StorageLocation {
@@ -146,8 +148,9 @@ model WorkPlan {
   importBatchId   String?
   createdAt       DateTime    @default(now())
 
-  workLogs        WorkLog[]
-  photos          WorkPhoto[]
+  workLogs               WorkLog[]
+  photos                 WorkPhoto[]
+  qualityCheckSessions   DressUpQualityCheckSession[]
 }
 
 enum ProcessType {
@@ -326,6 +329,67 @@ model Photo {
   workerId      String
   filePath      String
   takenAt       DateTime     @default(now())
+}
+
+// ===========================
+// ドレスアップ品質チェック系
+// ===========================
+
+enum QualityCheckType {
+  CHECKBOX   // ○×のみ
+  PHOTO      // 写真必須
+  TEXT       // テキスト入力必須
+}
+
+model DressUpQualityCheckItem {
+  id          String           @id @default(cuid())
+  label       String           // 例: "浮きがないか確認"
+  checkType   QualityCheckType
+  description String?          // 作業者向け補足説明
+  sortOrder   Int              @default(0)
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  dressUpItemLinks DressUpQualityCheckLink[]
+  results          DressUpQualityCheckResult[]
+}
+
+// DressUpItem ↔ DressUpQualityCheckItem の中間テーブル
+model DressUpQualityCheckLink {
+  dressUpItem        DressUpItem             @relation(fields: [dressUpItemId], references: [id], onDelete: Cascade)
+  dressUpItemId      String
+  qualityCheckItem   DressUpQualityCheckItem @relation(fields: [qualityCheckItemId], references: [id], onDelete: Cascade)
+  qualityCheckItemId String
+  sortOrder          Int                     @default(0)
+
+  @@id([dressUpItemId, qualityCheckItemId])
+}
+
+// 1回の品質チェックセッション
+model DressUpQualityCheckSession {
+  id          String    @id @default(cuid())
+  workPlan    WorkPlan  @relation(fields: [workPlanId], references: [id])
+  workPlanId  String
+  worker      User      @relation(fields: [workerId], references: [id])
+  workerId    String
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  results     DressUpQualityCheckResult[]
+}
+
+// 各チェック項目の回答
+model DressUpQualityCheckResult {
+  id          String                     @id @default(cuid())
+  session     DressUpQualityCheckSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId   String
+  checkItem   DressUpQualityCheckItem    @relation(fields: [checkItemId], references: [id])
+  checkItemId String
+  passed      Boolean?                   // CHECKBOX: true=○ false=×
+  photoUrl    String?                    // PHOTO type
+  textValue   String?                    // TEXT type
+  createdAt   DateTime                   @default(now())
 }
 
 // ===========================

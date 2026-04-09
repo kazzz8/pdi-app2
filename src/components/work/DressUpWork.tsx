@@ -138,7 +138,7 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
     });
     if (res.ok) {
       localStorage.removeItem(STORAGE_KEY(planId));
-      router.push(`/work/${planId}/complete?processType=DRESS_UP`);
+      router.push(`/work/${planId}/quality-check`);
     } else {
       setCompleting(false);
     }

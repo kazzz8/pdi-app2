@@ -13,6 +13,7 @@ type NavUser = {
 const NAV_ITEMS = [
   { href: "/analytics/overview", label: "工場概況",     icon: "📊", ready: true },
   { href: "/monitor",            label: "大型モニター", icon: "🖥️", ready: true },
+  { href: "/analytics/master",   label: "マスタ管理",  icon: "⚙️", ready: true },
   { href: "/analytics/process",  label: "工程進捗",     icon: "🔄", ready: false },
   { href: "/analytics/team",     label: "班別実績",    icon: "👥", ready: false },
   { href: "/analytics/defects",  label: "不具合分析",  icon: "🔍", ready: false },
