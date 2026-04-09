@@ -70,3 +70,20 @@ export async function PATCH(
 
   return NextResponse.json({ photo });
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ planId: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { planId } = await params;
+  const { photoId } = await req.json() as { photoId: string };
+
+  await prisma.workPhoto.delete({
+    where: { id: photoId, workPlanId: planId },
+  });
+
+  return NextResponse.json({ success: true });
+}

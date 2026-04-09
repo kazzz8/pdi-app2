@@ -193,6 +193,17 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
     photoInputRefs.current[itemName]?.click();
   };
 
+  const handleDeletePhoto = async (photoId: string) => {
+    const res = await fetch(`/api/work/${planId}/photos`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ photoId }),
+    });
+    if (res.ok) {
+      setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+    }
+  };
+
   const handleSaveCaption = async (photoId: string, caption: string) => {
     const res = await fetch(`/api/work/${planId}/photos`, {
       method: "PATCH",
@@ -317,28 +328,37 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
                   {itemPhotos.length > 0 && (
                     <div className="px-3 pb-3 space-y-2">
                       {itemPhotos.map((photo) => (
-                        <button
+                        <div
                           key={photo.id}
-                          onClick={() => setCaptionTarget(photo)}
-                          className="w-full text-left flex gap-3 items-start bg-white rounded-xl border border-purple-100 p-2 active:bg-purple-50 transition"
+                          className="relative w-full flex gap-3 items-start bg-white rounded-xl border border-purple-100 p-2"
                         >
-                          <img
-                            src={photo.url}
-                            alt={photo.caption ?? item}
-                            className="w-16 h-16 object-cover rounded-lg border border-purple-200 shrink-0"
-                          />
-                          <div className="flex-1 min-w-0 py-0.5">
-                            {photo.caption ? (
-                              <p className="text-sm text-gray-700 font-medium">{photo.caption}</p>
-                            ) : (
-                              <p className="text-sm text-gray-400 italic">タップしてメモを追加...</p>
-                            )}
-                            <p className="text-xs text-gray-300 mt-1">
-                              {new Date(photo.takenAt).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })} 撮影
-                            </p>
-                          </div>
-                          <span className="text-gray-300 text-sm shrink-0 mt-1">›</span>
-                        </button>
+                          <button
+                            onClick={() => setCaptionTarget(photo)}
+                            className="flex gap-3 items-start flex-1 text-left active:bg-purple-50 transition rounded-lg"
+                          >
+                            <img
+                              src={photo.url}
+                              alt={photo.caption ?? item}
+                              className="w-16 h-16 object-cover rounded-lg border border-purple-200 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0 py-0.5">
+                              {photo.caption ? (
+                                <p className="text-sm text-gray-700 font-medium">{photo.caption}</p>
+                              ) : (
+                                <p className="text-sm text-gray-400 italic">タップしてメモを追加...</p>
+                              )}
+                              <p className="text-xs text-gray-300 mt-1">
+                                {new Date(photo.takenAt).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })} 撮影
+                              </p>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => handleDeletePhoto(photo.id)}
+                            className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-red-100 hover:text-red-500 transition text-xs font-bold"
+                          >
+                            ×
+                          </button>
+                        </div>
                       ))}
                     </div>
                   )}

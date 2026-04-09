@@ -216,17 +216,17 @@ async function main() {
   ]);
 
   // ── 開発用ショートカットユーザー（本番では使用しないこと）──
-  const devPw = await bcrypt.hash("2222", 10);
-  const devPw2 = await bcrypt.hash("1111", 10);
+  const devPw = await bcrypt.hash("m01", 10);
+  const devPw2 = await bcrypt.hash("w01", 10);
   await prisma.user.upsert({
-    where:  { employeeId: "bbbb" },
+    where:  { employeeId: "m01" },
     update: { password: devPw },
-    create: { employeeId: "bbbb", name: "開発管理者", password: devPw, role: "MANAGER", teamId: null },
+    create: { employeeId: "m01", name: "開発管理者", password: devPw, role: "MANAGER", teamId: null },
   });
   const devWorker = await prisma.user.upsert({
-    where:  { employeeId: "aaaa" },
+    where:  { employeeId: "w01" },
     update: { password: devPw2, teamId: tDressup.id },
-    create: { employeeId: "aaaa", name: "開発作業者", password: devPw2, role: "GENERAL", teamId: tDressup.id },
+    create: { employeeId: "w01", name: "開発作業者", password: devPw2, role: "GENERAL", teamId: tDressup.id },
   });
 
   // 工程 → 担当ワーカー・チーム
@@ -503,7 +503,7 @@ async function main() {
   }
   console.log(`✓ 不具合 ${defCount} 件`);
 
-  // ── 開発用ユーザー「aaaa」の作業計画（ドレスアップ、1台60分） ──────
+  // ── 開発用ユーザー「w01」の作業計画（ドレスアップ、1台60分） ──────
   const DEV_STD_MIN = 60;
   const devSlots = buildSlots(1, DEV_STD_MIN, 99, WORK_START, WORK_END);
   const pastDevSlots = devSlots.filter(s => s.end <= NOW);
@@ -606,7 +606,7 @@ async function main() {
     }
     // 直近2未着手 + 未来スロット: ログなし
   }
-  console.log(`✓ 開発用ユーザー「aaaa」の作業計画 ${devPlanCount} 件`);
+  console.log(`✓ 開発用ユーザー「w01」の作業計画 ${devPlanCount} 件`);
 
   console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -620,8 +620,8 @@ async function main() {
    作業者（点検）  : I001
 
  開発用ショートカット
-   管理者 : bbbb / 2222
-   作業者 : aaaa / 1111  （ドレスアップ工程）
+   管理者 : m01 / m01
+   作業者 : w01 / w01  （ドレスアップ工程）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `);
 }
