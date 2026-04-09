@@ -194,6 +194,7 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
   };
 
   const handleDeletePhoto = async (photoId: string) => {
+    if (!window.confirm("この写真を削除しますか？")) return;
     const res = await fetch(`/api/work/${planId}/photos`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
