@@ -141,12 +141,17 @@ export default function TopPage() {
         {/* 管理者呼び出し（全幅） */}
         <button
           onClick={() => showToast("管理者呼び出し機能は準備中です")}
-          className="w-full bg-red-500 hover:bg-red-600 active:scale-95 transition-all rounded-2xl shadow px-5 py-4 flex items-center justify-center gap-3"
+          className="w-full bg-white rounded-2xl shadow-sm px-5 py-4 flex items-center justify-center gap-3 active:scale-95 transition-transform"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <span className="text-white font-bold text-base">管理者を呼ぶ</span>
+          <div className="w-14 h-14 bg-red-500 rounded-2xl flex items-center justify-center shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-800">管理者を呼ぶ</p>
+            <p className="text-xs text-gray-400">トラブル・緊急時に使用</p>
+          </div>
         </button>
 
       </main>
