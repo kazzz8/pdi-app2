@@ -176,7 +176,7 @@ function PlanCard({
           {judgeLabel.text}
         </span>
         <span className="text-xs text-gray-400 truncate flex-1 min-w-0">
-          {plan.vehicle.barcode} / {plan.vehicle.modelName ?? "−"} / {plan.vehicle.exteriorColor ?? "−"}
+          {plan.vehicle.barcode} / {plan.vehicle.modelName ?? "−"}
         </span>
         {delayStatus === "paused" ? (
           <button onClick={onResume}

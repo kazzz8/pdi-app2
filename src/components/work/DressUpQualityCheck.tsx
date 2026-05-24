@@ -163,7 +163,7 @@ export default function DressUpQualityCheck({ planId, vehicle }: Props) {
         <p className="text-xs opacity-75">品質チェック</p>
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-lg">取付確認チェック</h1>
-          <p className="text-sm opacity-90">{vehicle.modelName} / {vehicle.exteriorColor}</p>
+          <p className="text-sm opacity-90">{vehicle.modelName}</p>
         </div>
       </header>
 

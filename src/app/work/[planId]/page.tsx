@@ -102,7 +102,6 @@ export default function WorkStartPage() {
           <p className="text-xs text-gray-400 mb-1">対象車両</p>
           <p className="text-lg font-bold text-gray-800">{plan.vehicle.modelName ?? "−"}</p>
           <p className="text-sm text-gray-500">整理番号: {plan.vehicle.barcode}</p>
-          <p className="text-sm text-gray-500">外板色: {plan.vehicle.exteriorColor ?? "−"}</p>
           <p className="text-sm text-gray-500">点検区分: {plan.vehicle.inspectionType}点検</p>
         </div>
 

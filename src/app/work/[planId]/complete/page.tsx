@@ -80,7 +80,7 @@ export default function CompletePage() {
             <h3 className="font-semibold text-gray-800 mb-3">点検報告書</h3>
 
             <div className="text-sm text-gray-600 space-y-1 mb-4">
-              <p><span className="text-gray-400">車両：</span>{report.vehicle.modelName ?? "−"} / {report.vehicle.exteriorColor ?? "−"}</p>
+              <p><span className="text-gray-400">車両：</span>{report.vehicle.modelName ?? "−"}</p>
               <p><span className="text-gray-400">整理番号：</span>{report.vehicle.barcode}</p>
               <p><span className="text-gray-400">検査員：</span>{report.worker.name}</p>
             </div>

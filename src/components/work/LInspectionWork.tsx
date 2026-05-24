@@ -165,7 +165,7 @@ export default function LInspectionWork({ planId, logId, interruptionLogId, plan
         <p className="text-xs opacity-75">作業中</p>
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-lg">{PROCESS_LABEL[plan.processType] ?? "点検"}</h1>
-          <p className="text-sm opacity-90">{plan.vehicle.modelName} / {plan.vehicle.exteriorColor}</p>
+          <p className="text-sm opacity-90">{plan.vehicle.modelName}</p>
         </div>
       </header>
 
