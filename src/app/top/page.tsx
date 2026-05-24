@@ -13,55 +13,49 @@ const DUMMY_NOTICES = [
 const NAV_ITEMS = [
   {
     label: "作業計画",
-    description: "今日の作業スケジュール",
-    href: "/dashboard",
+    description: "今日の作業",
+    href: "/dashboard" as string | null,
     iconBg: "bg-blue-500",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
       </svg>
     ),
   },
   {
     label: "健康状態",
-    description: "体調・健康の記録",
-    href: "/health",
+    description: "体調の記録",
+    href: "/health" as string | null,
     iconBg: "bg-green-500",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
     ),
   },
   {
     label: "個人実績",
-    description: "スキル・作業効率の推移",
-    href: "/my-records",
+    description: "スキル・効率",
+    href: "/my-records" as string | null,
     iconBg: "bg-purple-500",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     ),
   },
   {
     label: "勤怠入力",
-    description: "出勤・退勤の記録",
+    description: "出勤・退勤",
     href: null,
     iconBg: "bg-indigo-500",
     icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
   },
 ];
-
-const CHEVRON = (
-  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-300 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-  </svg>
-);
 
 export default function TopPage() {
   const { data: session, status } = useSession();
@@ -79,7 +73,7 @@ export default function TopPage() {
     setTimeout(() => setToast(null), 2500);
   }
 
-  const itemClass = "w-full bg-white rounded-2xl shadow-sm px-5 py-4 flex items-center gap-4 active:scale-95 transition-transform";
+  const cardClass = "flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm gap-3 py-6 active:scale-95 transition-transform";
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -117,48 +111,42 @@ export default function TopPage() {
           </div>
         </section>
 
-        {/* メニューボタン群 */}
-        {NAV_ITEMS.map((item) =>
-          item.href ? (
-            <Link key={item.label} href={item.href} className={itemClass}>
-              <div className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                {item.icon}
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-gray-800">{item.label}</p>
-                <p className="text-xs text-gray-400">{item.description}</p>
-              </div>
-              {CHEVRON}
-            </Link>
-          ) : (
-            <button key={item.label} onClick={() => showToast(`${item.label}機能は準備中です`)} className={itemClass}>
-              <div className={`w-12 h-12 ${item.iconBg} rounded-xl flex items-center justify-center shrink-0`}>
-                {item.icon}
-              </div>
-              <div className="text-left">
-                <p className="text-sm font-semibold text-gray-800">{item.label}</p>
-                <p className="text-xs text-gray-400">{item.description}</p>
-              </div>
-              {CHEVRON}
-            </button>
-          )
-        )}
+        {/* メニュー 2×2 グリッド */}
+        <div className="grid grid-cols-2 gap-4">
+          {NAV_ITEMS.map((item) =>
+            item.href ? (
+              <Link key={item.label} href={item.href} className={cardClass}>
+                <div className={`w-14 h-14 ${item.iconBg} rounded-2xl flex items-center justify-center shadow`}>
+                  {item.icon}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                  <p className="text-xs text-gray-400">{item.description}</p>
+                </div>
+              </Link>
+            ) : (
+              <button key={item.label} onClick={() => showToast(`${item.label}機能は準備中です`)} className={cardClass}>
+                <div className={`w-14 h-14 ${item.iconBg} rounded-xl flex items-center justify-center shadow`}>
+                  {item.icon}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                  <p className="text-xs text-gray-400">{item.description}</p>
+                </div>
+              </button>
+            )
+          )}
+        </div>
 
-        {/* 管理者呼び出し */}
+        {/* 管理者呼び出し（全幅） */}
         <button
           onClick={() => showToast("管理者呼び出し機能は準備中です")}
-          className="w-full bg-red-500 hover:bg-red-600 active:scale-95 transition-all rounded-2xl shadow px-5 py-4 flex items-center gap-4"
+          className="w-full bg-red-500 hover:bg-red-600 active:scale-95 transition-all rounded-2xl shadow px-5 py-4 flex items-center justify-center gap-3"
         >
-          <div className="w-12 h-12 bg-red-400 rounded-xl flex items-center justify-center shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-semibold text-white">管理者を呼ぶ</p>
-            <p className="text-xs text-red-200">トラブル・緊急時に使用</p>
-          </div>
-          {CHEVRON}
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span className="text-white font-bold text-base">管理者を呼ぶ</span>
         </button>
 
       </main>
