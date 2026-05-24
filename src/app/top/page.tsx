@@ -122,6 +122,25 @@ export default function TopPage() {
           ))}
         </div>
 
+        {/* 個人実績 */}
+        <Link
+          href="/my-records"
+          className="w-full bg-white rounded-2xl shadow-sm px-5 py-4 flex items-center gap-4 active:scale-95 transition-transform"
+        >
+          <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-semibold text-gray-800">個人実績</p>
+            <p className="text-xs text-gray-400">スキル・作業効率の推移</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-300 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+
         {/* 管理者呼び出し */}
         <button
           onClick={() => showToast("管理者呼び出し機能は準備中です")}
