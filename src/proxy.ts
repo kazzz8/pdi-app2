@@ -10,7 +10,7 @@ export async function proxy(req: NextRequest) {
 
   if (isAuthPage) {
     if (isAuth) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/top", req.url));
     }
     return NextResponse.next();
   }
@@ -31,5 +31,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/vehicles/:path*", "/admin/:path*", "/analytics/:path*", "/monitor/:path*", "/login"],
+  matcher: ["/top/:path*", "/top", "/health/:path*", "/health", "/dashboard/:path*", "/vehicles/:path*", "/admin/:path*", "/analytics/:path*", "/monitor/:path*", "/login"],
 };

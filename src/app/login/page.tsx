@@ -26,7 +26,7 @@ export default function LoginPage() {
       setError("社員番号またはパスワードが正しくありません");
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      router.push("/top");
     }
   };
 
