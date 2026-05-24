@@ -34,7 +34,6 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState("");
   const [showPauseForm, setShowPauseForm] = useState(false);
-  const [completing, setCompleting] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   // 写真関連
@@ -124,24 +123,10 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
     if (res.ok) router.push("/dashboard");
   };
 
-  const handleComplete = async () => {
-    setCompleting(true);
-    const res = await fetch(`/api/work/${planId}/complete`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        logId,
-        interruptionLogId,
-        completedItems: Array.from(checkedItems),
-        notes: notes || undefined,
-      }),
-    });
-    if (res.ok) {
-      localStorage.removeItem(STORAGE_KEY(planId));
-      router.push(`/work/${planId}/quality-check`);
-    } else {
-      setCompleting(false);
-    }
+  const handleGoToChecklist = () => {
+    const params = new URLSearchParams({ logId });
+    if (interruptionLogId) params.set("interruptionLogId", interruptionLogId);
+    router.push(`/work/${planId}/item-check?${params.toString()}`);
   };
 
   // 写真撮影→リサイズ→アップロード
@@ -251,7 +236,7 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
         {/* チェックリスト（各項目に写真機能を統合） */}
         <div className="bg-white rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-gray-800 text-sm">作業チェックリスト</h2>
+            <h2 className="font-semibold text-gray-800 text-sm">ドレスアップオーダー</h2>
             <span className="text-xs text-gray-400">{checkedItems.size} / {DRESS_UP_CHECKLIST_ITEMS.length}</span>
           </div>
           <div className="space-y-3">
@@ -390,11 +375,10 @@ export default function DressUpWork({ planId, logId, interruptionLogId, plan }: 
             一時中断
           </button>
           <button
-            onClick={handleComplete}
-            disabled={completing}
-            className="flex-1 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 disabled:opacity-40 transition"
+            onClick={handleGoToChecklist}
+            className="flex-1 bg-purple-600 text-white py-4 rounded-xl font-bold hover:bg-purple-700 transition"
           >
-            {completing ? "保存中..." : "作業完了"}
+            チェックリスト表示
           </button>
         </div>
       </main>
