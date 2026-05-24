@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const DUMMY_NOTICES = [
-  { id: 1, date: "5/24", body: "本日の作業終了は17:00を予定しています。安全作業でお願いします。" },
-  { id: 2, date: "5/23", body: "エリアBの洗車ラインが午後から通常稼働に戻りました。" },
+  { id: 1, date: "5/24", body: "Bピラーへの傷が多発しています。ドアハンドルを掴んでドアの開閉するよう徹底してください。" },
+  { id: 2, date: "5/23", body: "6月の有休申請は5月27日(水)までにお願いします。" },
 ];
 
 const NAV_ITEMS = [

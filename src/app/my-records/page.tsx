@@ -133,7 +133,7 @@ export default function MyRecordsPage() {
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
-            <h2 className="text-sm font-bold text-gray-700">ドレスアップ 作業効率推移</h2>
+            <h2 className="text-sm font-bold text-gray-700">計画遵守率・作業効率推移</h2>
           </div>
           <p className="text-xs text-gray-400 mb-4">過去3年間・月別（2023/06〜2026/05）</p>
 
@@ -161,13 +161,13 @@ export default function MyRecordsPage() {
               <Tooltip
                 formatter={(value, name) => [
                   `${value}%`,
-                  name === "completion" ? "完了率" : "時間効率",
+                  name === "completion" ? "計画遵守率" : "時間効率",
                 ]}
                 labelStyle={{ fontSize: 11 }}
                 contentStyle={{ fontSize: 12 }}
               />
               <Legend
-                formatter={(value) => value === "completion" ? "完了率" : "時間効率（100%超=標準より速い）"}
+                formatter={(value) => value === "completion" ? "計画遵守率" : "時間効率（100%超=標準より速い）"}
                 wrapperStyle={{ fontSize: 11 }}
               />
               <Line
